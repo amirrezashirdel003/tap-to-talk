@@ -1,0 +1,93 @@
+export const categories = [
+  {
+    id: "water",
+    title: "آب",
+    emoji: "💧",
+    color: "bg-blue-100",
+    items: [
+      { id: "glass", title: "لیوان آب", emoji: "🥛" },
+      { id: "bottle", title: "بطری آب", emoji: "🍼" },
+      { id: "ice", title: "یخ", emoji: "🧊" },
+      { id: "hot", title: "آب داغ", emoji: "♨️" },
+    ],
+  },
+  {
+    id: "food",
+    title: "غذا",
+    emoji: "🍽️",
+    color: "bg-orange-100",
+    items: [
+      { id: "rice", title: "برنج", emoji: "🍚" },
+      { id: "bread", title: "نان", emoji: "🍞" },
+      { id: "fruit", title: "میوه", emoji: "🍎" },
+      { id: "soup", title: "سوپ", emoji: "🍲" },
+    ],
+  },
+  {
+    id: "home",
+    title: "خونه",
+    emoji: "🏠",
+    color: "bg-green-100",
+    items: [
+      { id: "bed", title: "تخت", emoji: "🛏️" },
+      { id: "sofa", title: "مبل", emoji: "🛋️" },
+      { id: "door", title: "در", emoji: "🚪" },
+      { id: "window", title: "پنجره", emoji: "🪟" },
+    ],
+  },
+  {
+    id: "clothes",
+    title: "لباس",
+    emoji: "👕",
+    color: "bg-purple-100",
+    items: [
+      { id: "shirt", title: "پیراهن", emoji: "👕" },
+      { id: "pants", title: "شلوار", emoji: "👖" },
+      { id: "shoes", title: "کفش", emoji: "👟" },
+      { id: "socks", title: "جوراب", emoji: "🧦" },
+    ],
+  },
+  {
+    id: "firstaid",
+    title: "کمک‌اولیه",
+    emoji: "🩹",
+    color: "bg-red-100",
+    items: [
+      { id: "pain", title: "درد", emoji: "😖" },
+      { id: "medicine", title: "دارو", emoji: "💊" },
+      { id: "doctor", title: "دکتر", emoji: "🩺" },
+      { id: "bandage", title: "چسب زخم", emoji: "🩹" },
+    ],
+  },
+  {
+    id: "people",
+    title: "افراد",
+    emoji: "👨‍👩‍👧",
+    color: "bg-teal-100",
+    items: [
+      { id: "mom", title: "مامان", emoji: "👩" },
+      { id: "dad", title: "بابا", emoji: "👨" },
+      { id: "friend", title: "دوست", emoji: "🧑" },
+      { id: "family", title: "خانواده", emoji: "👨‍👩‍👧" },
+    ],
+  },
+  {
+    id: "feelings",
+    title: "احساسات",
+    emoji: "🙂",
+    color: "bg-yellow-100",
+    items: [
+      { id: "happy", title: "خوشحال", emoji: "😀" },
+      { id: "sad", title: "ناراحت", emoji: "😢" },
+      { id: "tired", title: "خسته", emoji: "😴" },
+      { id: "angry", title: "عصبانی", emoji: "😠" },
+    ],
+  },
+  {
+    id: "more",
+    title: "بیشتر",
+    emoji: "⋯",
+    color: "bg-gray-100",
+    items: [],
+  },
+];
