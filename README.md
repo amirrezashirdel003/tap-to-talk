@@ -1,85 +1,102 @@
 # Tap to Talk
 
-Tap to Talk is a Persian-first visual communication app concept for people who may find spoken communication difficult, including some older adults and people with speech difficulties. Users browse everyday categories and select pictogram-labelled items as an alternative way to express basic needs.
+Tap to Talk is a Persian-first visual communication app for people who may have difficulty speaking, including some older adults and people with speech difficulties. Users choose from everyday categories and tap a labelled item to hear its Persian text spoken aloud.
 
-The project is an assistive communication concept, not a medical device or a substitute for professional care. The current published `main` branch is an early prototype and does **not** yet provide working Persian text-to-speech.
+The app is an assistive communication project, not a medical device or a substitute for professional care. Its content is predefined and limited to the needs represented in the app.
 
-## Current status
+## Features
 
-The current GitHub `main` branch includes:
+- Persian, right-to-left interface with eight categories and 66 predefined items
+- Emoji labels displayed with each category and item
+- Responsive layout that adapts from two columns on narrow screens to four columns on wider screens
+- Persian text-to-speech powered by Piper voice `fa_IR-amir-medium`
+- Playback controls for pause, resume, and stop
+- Progressive Web App manifest and service worker for installable app-shell resources
+- Offline speech after the initial model and application resources have been prepared online
+- IndexedDB caching for previously generated audio
+- Online/offline and speech-model readiness indicators
 
-- A React single-page interface with a home page and category pages
-- Eight predefined everyday categories with emoji labels
-- Persian text labels displayed beside the emoji pictograms
-- A browser speech-synthesis call when an item is selected
-- A Vite PWA configuration and web app manifest
+## Persian speech and offline use
 
-**Known prototype limitation:** The current category click handler speaks a hard-coded English “hello world” phrase using the `en-US` browser voice. It does not speak the selected Persian item. Therefore, the current GitHub version does not yet deliver spoken Persian output for its intended users. The Piper Persian voice, pronunciation handling, offline model preparation, and audio caching described in the local technical documentation are not part of the current GitHub `main` implementation.
+The first model download requires an internet connection and downloads approximately 61 MB from Hugging Face. To prepare offline speech:
+
+1. Open the app over HTTPS (or `localhost`) in a supported browser while online.
+2. Allow the app to finish loading and its service worker to cache the application resources.
+3. Use **Prepare for offline use** and wait until the voice status says it is ready.
+4. Test playback once with the network disconnected.
+
+Once prepared, Piper, ONNX Runtime Web, and the phonemizer run in the browser; new speech can be generated without a network connection. Previously generated WAV audio is cached locally in IndexedDB. Browser storage may be cleared or evicted, and installation/offline support depends on the browser and device.
+
+The install button is shown only in browsers that provide the PWA installation prompt. On other supported platforms, use the browser's own install/add-to-home-screen option when available. The service worker is disabled in the Vite development server; use a production build and preview or an HTTPS host to verify PWA behavior.
 
 ## Technology
 
-- React and React DOM
-- JavaScript and JSX
-- Vite
-- React Router
-- Vite PWA plugin
-- Tailwind CSS plugin is referenced by the Vite config and stylesheet
+- React, React DOM, JavaScript, and JSX
+- Vite and React Router
+- Tailwind CSS
+- Piper TTS Web with the `fa_IR-amir-medium` voice
+- ONNX Runtime Web and WebAssembly
+- Piper phonemizer WebAssembly
+- `vite-plugin-pwa` and Workbox
+- Cache Storage for the voice model and app resources; IndexedDB for generated audio
 
-## Run locally
+Speech generation runs locally in the browser after the voice model has been downloaded. The initial model download is from Hugging Face; the project does not define an application server or a custom speech API.
+
+## Getting started
+
+Requirements: Node.js and npm versions compatible with the Vite version in `package.json`.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 Use the local URL printed by Vite.
 
-Build and preview:
+Build and preview the production app:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Lint:
+Run lint:
 
 ```bash
 npm run lint
 ```
 
-> **Dependency note:** The current committed `package.json` does not declare the Tailwind packages imported by `vite.config.js` and `src/index.css`. A clean install/build may therefore require dependency manifest updates before it works as expected.
-
-## Application routes
+## Routes
 
 | Route | Purpose |
 |---|---|
 | `/` | Browse the predefined categories |
-| `/category/:categoryId` | View the selected category's items |
+| `/category/:categoryId` | Select an item and play its Persian speech |
 
-Category and item labels are local static data in `src/data/categories.js`. The current pictograms are Unicode emoji rather than a dedicated image collection.
+Category and item data are local and static in `src/data/categories.js`. The visible pictograms are Unicode emoji, not a dedicated image library.
 
 ## Project structure
 
 ```text
 src/
-  components/   Shared category and status UI
-  data/         Category and item content
+  components/   Shared category and online/offline UI
+  data/         Categories, items, and Persian pronunciation adjustments
+  hooks/        Text-to-speech playback state
   pages/        Home and category pages
+  services/     Piper inference and generated-audio storage
   App.jsx       Route definitions
   main.jsx      React entry point
 public/         PWA icons and static assets
-vite.config.js  Vite and PWA configuration
+vite.config.js  Vite, Tailwind, and PWA configuration
 ```
 
-## Documentation
+See [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) for the detailed Persian technical documentation, including architecture, PWA caching, TTS, offline preparation, and implementation limits.
 
-- [Technical project documentation](./PROJECT_DOCUMENTATION.md) — describes the enhanced local workspace and its architecture.
+## Current limitations
 
-The technical documentation describes work in the local workspace that has not yet been synchronized to GitHub `main`. Treat the current source branch as authoritative for implemented behavior.
-
-## Next steps
-
-- Connect each item to its own Persian speech output.
-- Decide whether to ship the local Piper-based TTS implementation and validate its dependencies.
-- Add browser-level tests for routes, speech interaction, and offline behavior.
-- Capture genuine screenshots after the application behavior is complete.
+- The eight categories and 66 items are fixed in source; users cannot add custom messages.
+- The pictograms are emoji and may look different across devices.
+- Pronunciation preprocessing includes a small hand-maintained word list; it is not comprehensive.
+- First-time offline setup requires internet, sufficient storage, and a compatible browser.
+- PWA installation and persistent browser storage are platform-dependent.
+- There are no automated browser tests for speech or offline behavior in the repository.

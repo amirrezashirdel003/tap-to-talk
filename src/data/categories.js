@@ -124,8 +124,8 @@ export const categories = [
     emoji: "⋯",
     color: "bg-gray-100",
     items: [
-      { id: "yes", title: "بله", emoji: "✅" },
-      { id: "no", title: "نه", emoji: "❌" },
+      { id: "yes", title: "بله", emoji: "👍" },
+      { id: "no", title: "نه", emoji: "👎" },
       { id: "maybe", title: "شاید", emoji: "🤔" },
     ],
   },
