@@ -2,6 +2,8 @@
 
 A Next.js App Router dashboard for greenhouse plant administration. It combines a typed React interface, validated plant forms, and API-backed plant operations.
 
+[Read the detailed technical documentation](./TECHNICAL_DOCUMENTATION.md).
+
 ## Features
 
 - Login interface and dashboard route gating

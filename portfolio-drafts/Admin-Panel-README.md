@@ -2,6 +2,8 @@
 
 A React-based administration dashboard for plant and article content. The interface provides protected dashboard routes and connects to an external API for data operations.
 
+[Read the detailed technical documentation](./TECHNICAL_DOCUMENTATION.md).
+
 ## Features
 
 - Login page and client-side protected dashboard routes

@@ -2,6 +2,8 @@
 
 A responsive Persian-language storefront concept for jewelry, coins, and investment products. The project focuses on the customer-facing interface: category selection, product presentation, and informational sections.
 
+[Read the detailed technical documentation](./TECHNICAL_DOCUMENTATION.md).
+
 ## Features
 
 - Responsive landing page with a hero section

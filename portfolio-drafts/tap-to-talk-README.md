@@ -2,6 +2,8 @@
 
 Tap to Talk is a Persian-first visual communication web app. Users choose a category and a pictogram-labelled item to express everyday needs. The enhanced local workspace adds browser-based Persian text-to-speech and progressive offline support.
 
+[Read the detailed technical documentation](./PROJECT_DOCUMENTATION.md).
+
 > **Branch status:** This draft describes the current local workspace. GitHub `main` is behind it: the committed category-page handler currently speaks the fixed English phrase “hello world” with `en-US`, rather than the selected item. Publish this README only together with the reviewed implementation that it documents.
 
 ## Features in the local workspace
