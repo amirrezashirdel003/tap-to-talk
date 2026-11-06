@@ -1,6 +1,8 @@
 # Tap to Talk
 
-Tap to Talk is a Persian-first visual communication web app. Users browse everyday categories and select pictogram-labelled items. This repository is currently an early prototype; the published `main` branch does **not** yet provide working Persian text-to-speech.
+Tap to Talk is a Persian-first visual communication app concept for people who may find spoken communication difficult, including some older adults and people with speech difficulties. Users browse everyday categories and select pictogram-labelled items as an alternative way to express basic needs.
+
+The project is an assistive communication concept, not a medical device or a substitute for professional care. The current published `main` branch is an early prototype and does **not** yet provide working Persian text-to-speech.
 
 ## Current status
 
@@ -12,7 +14,7 @@ The current GitHub `main` branch includes:
 - A browser speech-synthesis call when an item is selected
 - A Vite PWA configuration and web app manifest
 
-**Known prototype limitation:** The current category click handler speaks a hard-coded English “hello world” phrase using the `en-US` browser voice. It does not speak the selected Persian item. The Piper Persian voice, pronunciation handling, offline model preparation, and audio caching described in the local technical draft are not part of the current GitHub `main` implementation.
+**Known prototype limitation:** The current category click handler speaks a hard-coded English “hello world” phrase using the `en-US` browser voice. It does not speak the selected Persian item. Therefore, the current GitHub version does not yet deliver spoken Persian output for its intended users. The Piper Persian voice, pronunciation handling, offline model preparation, and audio caching described in the local technical documentation are not part of the current GitHub `main` implementation.
 
 ## Technology
 
@@ -72,7 +74,6 @@ vite.config.js  Vite and PWA configuration
 ## Documentation
 
 - [Technical project documentation](./PROJECT_DOCUMENTATION.md) — describes the enhanced local workspace and its architecture.
-- [Portfolio documentation drafts](./portfolio-drafts/README.md) — English profile, repository README, and technical-documentation drafts.
 
 The technical documentation describes work in the local workspace that has not yet been synchronized to GitHub `main`. Treat the current source branch as authoritative for implemented behavior.
 
