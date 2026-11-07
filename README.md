@@ -4,6 +4,8 @@ Tap to Talk is a Persian-first visual communication app for people who may have 
 
 The app is an assistive communication project, not a medical device or a substitute for professional care. Its content is predefined and limited to the needs represented in the app.
 
+**Live demo:** [tap-to-talk-amirrezashirdel.netlify.app](https://tap-to-talk-amirrezashirdel.netlify.app)
+
 ## Features
 
 - Persian, right-to-left interface with eight categories and 66 predefined items
@@ -65,6 +67,8 @@ Run lint:
 ```bash
 npm run lint
 ```
+
+The project is deployed on Netlify from the `main` branch on GitHub. The SPA redirect in `public/_redirects` keeps direct links and browser refreshes on category routes working.
 
 ## Routes
 
