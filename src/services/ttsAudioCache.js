@@ -3,6 +3,7 @@ const STORE_NAME = "generated-audio";
 const MAX_CACHE_ENTRIES = 100;
 const MAX_CACHE_BYTES = 50 * 1024 * 1024;
 const VOICE_ID = "fa_IR-amir-medium";
+const AUDIO_CACHE_VERSION = 2;
 
 let databasePromise;
 
@@ -31,7 +32,7 @@ function reportCacheError(operation, error) {
 }
 
 function cacheKey(text) {
-  return `${VOICE_ID}:${text}`;
+  return `${VOICE_ID}:v${AUDIO_CACHE_VERSION}:${text}`;
 }
 
 export async function getCachedAudio(text) {

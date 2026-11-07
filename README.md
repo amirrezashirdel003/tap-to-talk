@@ -9,14 +9,17 @@ The app is an assistive communication project, not a medical device or a substit
 ## Features
 
 - Persian, right-to-left interface with eight categories and 66 predefined items
+- Logo-first startup followed by a brief responsive skeleton screen
 - Emoji labels displayed with each category and item
 - Responsive layout that adapts from two columns on narrow screens to four columns on wider screens
 - Persian text-to-speech powered by Piper voice `fa_IR-amir-medium`
+- Slightly slower speech pacing and a hand-maintained pronunciation dictionary for selected Persian words
 - Playback controls for pause, resume, and stop
 - Progressive Web App manifest and service worker for installable app-shell resources
 - Offline speech after the initial model and application resources have been prepared online
 - IndexedDB caching for previously generated audio
 - Online/offline and speech-model readiness indicators
+- Automatic app updates through the PWA service worker
 
 ## Persian speech and offline use
 
@@ -29,7 +32,13 @@ The first model download requires an internet connection and downloads approxima
 
 Once prepared, Piper, ONNX Runtime Web, and the phonemizer run in the browser; new speech can be generated without a network connection. Previously generated WAV audio is cached locally in IndexedDB. Browser storage may be cleared or evicted, and installation/offline support depends on the browser and device.
 
+Offline speech cannot be guaranteed before the first online setup or after browser storage is cleared. Keep the app online until the readiness indicator says the voice and application resources are ready. If only the voice model is cached, reconnect, refresh the app, and retry preparation; the app will keep the model and continue checking the service-worker resources.
+
 The install button is shown only in browsers that provide the PWA installation prompt. On other supported platforms, use the browser's own install/add-to-home-screen option when available. The service worker is disabled in the Vite development server; use a production build and preview or an HTTPS host to verify PWA behavior.
+
+## Updating the installed app
+
+The Netlify production site is connected to the GitHub `main` branch, so each push triggers a new deployment. Installed copies use the PWA service worker's automatic update behavior: while online, open the app to check for and install the latest app files. If an already-open app still shows the previous version, close and reopen it or refresh while online. You do not need to uninstall and reinstall the app. Offline use continues with the last version that was successfully cached until the device reconnects and receives an update.
 
 ## Technology
 

@@ -19,8 +19,15 @@ const MODEL_URL = `${MODEL_HOST}${MODEL_PATH_PREFIX}/${MODEL_PATH}`;
 const CONFIG_URL = `${MODEL_URL}.json`;
 const MODEL_BYTES = 63531379;
 const MODEL_CACHE_NAME = "tap-to-talk-persian-tts-v1";
-const SPEECH_LENGTH_SCALE = 0.95;
+const SPEECH_LENGTH_SCALE = 1.05;
 const MAX_DOWNLOAD_ATTEMPTS = 3;
+const MODEL_DOWNLOAD_TIMEOUT_MS = 180000;
+const RUNTIME_ASSET_WAIT_MS = 60000;
+const RUNTIME_ASSET_POLL_MS = 1000;
+const RUNTIME_ASSETS_NOT_READY_MESSAGE =
+  "مدل گفتار دریافت شد، اما فایل‌های آفلاین برنامه هنوز آماده نیستند. اتصال را برقرار نگه دارید، صفحه را تازه‌سازی کنید و دوباره آماده‌سازی را بزنید.";
+const STORAGE_SPACE_ERROR_MESSAGE =
+  "فضای ذخیره‌سازی کافی برای مدل گفتار آفلاین وجود ندارد. فضای دستگاه را آزاد کنید و دوباره تلاش کنید.";
 const APP_RUNTIME_ASSETS = [
   onnxWasmUrl,
   onnxMjsUrl,
@@ -97,22 +104,34 @@ async function downloadWithProgress(url, onProgress) {
   }
 
   if (url === MODEL_URL && navigator.storage?.estimate) {
-    const { quota, usage } = await navigator.storage.estimate();
+    let storageEstimate;
+    try {
+      storageEstimate = await navigator.storage.estimate();
+    } catch (error) {
+      console.warn("Could not estimate browser storage before model download.", error);
+    }
     if (
-      Number.isFinite(quota) &&
-      Number.isFinite(usage) &&
-      quota - usage < MODEL_BYTES + 5 * 1024 * 1024
+      Number.isFinite(storageEstimate?.quota) &&
+      Number.isFinite(storageEstimate?.usage) &&
+      storageEstimate.quota - storageEstimate.usage <
+        MODEL_BYTES + 5 * 1024 * 1024
     ) {
-      throw new Error(
-        "فضای ذخیره‌سازی کافی برای مدل گفتار آفلاین وجود ندارد. فضای دستگاه را آزاد کنید و دوباره تلاش کنید.",
-      );
+      throw new Error(STORAGE_SPACE_ERROR_MESSAGE);
     }
   }
 
   let lastError;
   for (let attempt = 1; attempt <= MAX_DOWNLOAD_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      MODEL_DOWNLOAD_TIMEOUT_MS,
+    );
     try {
-      const response = await fetch(url, { cache: "no-store" });
+      const response = await fetch(url, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
       if (!response.ok) {
         throw new Error(`Model download failed with HTTP ${response.status}.`);
       }
@@ -167,7 +186,12 @@ async function downloadWithProgress(url, onProgress) {
       );
       return blob;
     } catch (error) {
-      lastError = error;
+      lastError =
+        error?.name === "AbortError"
+          ? new Error(
+              "دریافت مدل بیش از حد طول کشید. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.",
+            )
+          : error;
       if (
         attempt < MAX_DOWNLOAD_ATTEMPTS &&
         navigator.onLine &&
@@ -179,6 +203,8 @@ async function downloadWithProgress(url, onProgress) {
       } else {
         break;
       }
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 
@@ -274,22 +300,51 @@ async function ensurePhonemizer(session) {
 }
 
 async function runtimeAssetsAreCached() {
-  if (!("serviceWorker" in navigator)) {
+  if (!("serviceWorker" in navigator) || !("caches" in globalThis)) {
     return false;
   }
 
-  const registration = await navigator.serviceWorker.getRegistration();
+  let registration;
+  try {
+    registration = await navigator.serviceWorker.getRegistration();
+  } catch (error) {
+    console.warn("Could not inspect the application service worker.", error);
+    return false;
+  }
   if (!registration?.active) {
     return false;
   }
 
-  return Promise.all(
-    APP_RUNTIME_ASSETS.map(async (assetUrl) =>
-      Boolean(await caches.match(new URL(assetUrl, location.href).href, {
-        ignoreSearch: true,
-      })),
-    ),
-  ).then((results) => results.every(Boolean));
+  try {
+    const cachedAssets = await Promise.all(
+      APP_RUNTIME_ASSETS.map(async (assetUrl) =>
+        Boolean(
+          await caches.match(new URL(assetUrl, location.href).href, {
+            ignoreSearch: true,
+          }),
+        ),
+      ),
+    );
+    return cachedAssets.every(Boolean);
+  } catch (error) {
+    console.warn("Could not inspect cached application runtime assets.", error);
+    return false;
+  }
+}
+
+async function waitForRuntimeAssets() {
+  if (!("serviceWorker" in navigator) || !("caches" in globalThis)) {
+    return false;
+  }
+
+  const deadline = Date.now() + RUNTIME_ASSET_WAIT_MS;
+  while (Date.now() < deadline) {
+    if (await runtimeAssetsAreCached()) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, RUNTIME_ASSET_POLL_MS));
+  }
+  return false;
 }
 
 export async function checkPersianOfflineReadiness() {
@@ -336,11 +391,14 @@ export async function preparePersianModel(onProgress = () => {}) {
     updateModelStatus({ state: "initializing", loaded: MODEL_BYTES });
     await ensurePhonemizer(session);
 
-    const offlineAssetsReady = await runtimeAssetsAreCached();
+    const offlineAssetsReady = await waitForRuntimeAssets();
     if (!offlineAssetsReady) {
-      throw new Error(
-        "Application runtime assets are not cached yet. Reload the installed app online, then try again.",
-      );
+      updateModelStatus({
+        state: "cached",
+        loaded: MODEL_BYTES,
+        error: RUNTIME_ASSETS_NOT_READY_MESSAGE,
+      });
+      return false;
     }
 
     updateModelStatus({
@@ -348,14 +406,22 @@ export async function preparePersianModel(onProgress = () => {}) {
       loaded: MODEL_BYTES,
       error: "",
     });
+    return true;
   } catch (error) {
     console.error("Could not prepare Persian TTS for offline use.", error);
+    let errorMessage =
+      "آماده‌سازی گفتار آفلاین انجام نشد. اتصال اینترنت و فضای خالی دستگاه را بررسی و دوباره تلاش کنید.";
+    if (error?.name === "QuotaExceededError") {
+      errorMessage = STORAGE_SPACE_ERROR_MESSAGE;
+    } else if (error instanceof Error && /[\u0600-\u06FF]/u.test(error.message)) {
+      errorMessage = error.message;
+    } else if (!navigator.onLine) {
+      errorMessage =
+        "اتصال اینترنت قطع شد. برای دریافت مدل، دوباره آنلاین شوید و آماده‌سازی را تکرار کنید.";
+    }
     updateModelStatus({
       state: "error",
-      error:
-        error instanceof Error
-          ? error.message
-          : "آماده‌سازی آفلاین گفتار ناموفق بود.",
+      error: errorMessage,
     });
     throw error;
   }

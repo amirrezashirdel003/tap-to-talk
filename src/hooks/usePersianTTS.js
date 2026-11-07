@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cacheGeneratedAudio, getCachedAudio } from "../services/ttsAudioCache";
-import { synthesizePersian } from "../services/persianTTS";
+import {
+  getPersianModelStatus,
+  synthesizePersian,
+} from "../services/persianTTS";
 
 const INITIAL_PLAYBACK = {
   activeItemId: null,
@@ -9,8 +12,25 @@ const INITIAL_PLAYBACK = {
   progress: 0,
 };
 
-const GENERATION_ERROR_MESSAGE =
-  "صدا ساخته نشد. برای استفاده آفلاین، ابتدا مدل گفتار را آنلاین آماده کنید.";
+function getPlaybackErrorMessage(error) {
+  const modelReady = getPersianModelStatus().state === "ready";
+  if (!navigator.onLine && !modelReady) {
+    return "این دستگاه آفلاین است. اگر مدل گفتار قبلاً آماده نشده، برای دریافت و آماده‌سازی آن به اینترنت وصل شوید.";
+  }
+  if (!navigator.onLine) {
+    return "پخش گفتار آفلاین انجام نشد. اتصال ذخیره‌سازی برنامه را بررسی کنید و در صورت ادامهٔ مشکل، هنگام اتصال اینترنت دوباره آماده‌سازی کنید.";
+  }
+  if (error?.name === "NotAllowedError") {
+    return "مرورگر اجازهٔ پخش صدا را نداد. دوباره روی گزینه بزنید تا پخش آغاز شود.";
+  }
+  if (error?.name === "QuotaExceededError") {
+    return "فضای ذخیره‌سازی دستگاه کافی نیست. مقداری فضا آزاد کنید و دوباره تلاش کنید.";
+  }
+  if (!modelReady) {
+    return "مدل گفتار هنوز آماده نیست. اینترنت و فضای ذخیره‌سازی را بررسی و آماده‌سازی آفلاین را دوباره اجرا کنید.";
+  }
+  return "ساخت یا پخش گفتار ناموفق بود. دوباره تلاش کنید؛ اگر مشکل ادامه داشت، مدل گفتار را دوباره آماده کنید.";
+}
 
 function releaseAudio(audioRef, objectUrlRef) {
   const audio = audioRef.current;
@@ -60,7 +80,7 @@ export function usePersianTTS() {
         updatePlayback({
           activeItemId: playbackRef.current.activeItemId,
           status: "error",
-          error: GENERATION_ERROR_MESSAGE,
+          error: getPlaybackErrorMessage(error),
           progress: 0,
         });
       }

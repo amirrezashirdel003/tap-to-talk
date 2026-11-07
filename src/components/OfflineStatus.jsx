@@ -101,6 +101,11 @@ function OfflineStatus() {
             {model.error}
           </span>
         )}
+        {model.state === "cached" && model.error && (
+          <span role="status" className="text-amber-800">
+            {model.error}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
